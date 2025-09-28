@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Do You Still Love Me?</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fff0f6;
+      color: #333;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      color: #d6336c;
+    }
+    button {
+      background: #d6336c;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      margin: 10px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #a61e4d;
+    }
+    #response {
+      margin-top: 30px;
+      font-size: 1.3em;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <h1>💌 Dear Natalie</h1>
+  <p>There’s something I really need to ask you...</p>
+  <h2>Do you still love me? 💖</h2>
+  <div>
+    <button onclick="showYes()">Yes</button>
+    <button onclick="showNo()">No</button>
+  </div>
+  <div id="response"></div>
+
+  <script>
+    function showYes() {
+      document.getElementById("response").innerHTML = 
+        "✨ That makes me so happy! Thank you for forgiving me and still loving me, Natalie. 💕";
+    }
+    function showNo() {
+      document.getElementById("response").innerHTML = 
+        "😢 Even if your answer is no, I’ll always care about you, Natalie, and I’m truly sorry for hurting you.";
+    }
+  </script>
+</body>
+</html>
