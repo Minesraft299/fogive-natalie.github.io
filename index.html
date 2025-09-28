@@ -1,59 +1,84 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Do You Still Love Me?</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #fff0f6;
-      color: #333;
-      text-align: center;
-      padding: 50px;
-    }
-    h1 {
-      color: #d6336c;
-    }
-    button {
-      background: #d6336c;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      margin: 10px;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover {
-      background: #a61e4d;
-    }
-    #response {
-      margin-top: 30px;
-      font-size: 1.3em;
-      color: #444;
-    }
-  </style>
-</head>
-<body>
-  <h1>💌 Dear Natalie</h1>
-  <p>There’s something I really need to ask you...</p>
-  <h2>Do you still love me? 💖</h2>
-  <div>
-    <button onclick="showYes()">Yes</button>
-    <button onclick="showNo()">No</button>
-  </div>
-  <div id="response"></div>
 
-  <script>
-    function showYes() {
-      document.getElementById("response").innerHTML = 
-        "✨ That makes me so happy! Thank you for forgiving me and still loving me, Natalie. 💕";
+/**
+ * ForgiveMe-Natalie Bot
+ * Creates a PR asking Natalie for forgiveness 💖
+ */
+module.exports = (app) => {
+  app.on("installation.created", async (context) => {
+    const { repositories } = context.payload;
+    for (const repo of repositories) {
+      const owner = repo.owner.login;
+      const repoName = repo.name;
+
+      const branchName = "forgive-natalie";
+
+      // Create a branch from default branch
+      const { data: repoData } = await context.octokit.repos.get({
+        owner,
+        repo: repoName,
+      });
+
+      const defaultBranch = repoData.default_branch;
+      const { data: refData } = await context.octokit.git.getRef({
+        owner,
+        repo: repoName,
+        ref: `heads/${defaultBranch}`,
+      });
+
+      await context.octokit.git.createRef({
+        owner,
+        repo: repoName,
+        ref: `refs/heads/${branchName}`,
+        sha: refData.object.sha,
+      });
+
+      // Create/Update README.md with forgiveness note
+      const message = `
+# 💌 Dear Natalie
+
+Hi Natalie,  
+
+I know I don’t always talk much, but it’s never because I don’t care.  
+You’re really important to me.  
+
+I’m sorry if my quietness upset you.  
+**Will you forgive me?** ❤️
+
+— Your friend
+      `.trim();
+
+      // Get current README (if exists)
+      let sha;
+      try {
+        const { data: fileData } = await context.octokit.repos.getContent({
+          owner,
+          repo: repoName,
+          path: "README.md",
+        });
+        sha = fileData.sha;
+      } catch (err) {
+        // No README yet
+      }
+
+      await context.octokit.repos.createOrUpdateFileContents({
+        owner,
+        repo: repoName,
+        path: "README.md",
+        message: "🙏 Asking Natalie for forgiveness",
+        content: Buffer.from(message).toString("base64"),
+        branch: branchName,
+        sha,
+      });
+
+      // Open a Pull Request
+      await context.octokit.pulls.create({
+        owner,
+        repo: repoName,
+        title: "💖 Forgive me, Natalie",
+        head: branchName,
+        base: defaultBranch,
+        body: "This PR is my way of asking for your forgiveness, Natalie. If you merge it, it means we’re good again. ✨",
+      });
     }
-    function showNo() {
-      document.getElementById("response").innerHTML = 
-        "😢 Even if your answer is no, I’ll always care about you, Natalie, and I’m truly sorry for hurting you.";
-    }
-  </script>
-</body>
-</html>
+  });
+};
